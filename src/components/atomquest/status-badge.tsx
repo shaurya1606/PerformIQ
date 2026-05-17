@@ -3,10 +3,10 @@ import type { GoalSheetStatus } from '@/lib/dbconfig/atomquest'
 import { cn } from '@/lib/utils'
 
 const statusStyles: Record<GoalSheetStatus, string> = {
-    DRAFT: 'bg-neutral-800 text-neutral-200 border-neutral-700',
-    SUBMITTED: 'bg-amber-950 text-amber-200 border-amber-800',
-    RETURNED: 'bg-orange-950 text-orange-200 border-orange-800',
-    LOCKED: 'bg-emerald-950 text-emerald-200 border-emerald-800',
+    DRAFT: 'bg-slate-100 text-slate-700 border-slate-200',
+    SUBMITTED: 'bg-amber-50 text-amber-800 border-amber-200',
+    RETURNED: 'bg-orange-50 text-orange-800 border-orange-200',
+    LOCKED: 'bg-emerald-50 text-emerald-800 border-emerald-200',
 }
 
 const statusLabels: Record<GoalSheetStatus, string> = {
@@ -26,7 +26,7 @@ export function SheetStatusBadge({
     return (
         <Badge
             variant="outline"
-            className={cn('font-medium', statusStyles[status], className)}
+            className={cn('text-xs font-medium', statusStyles[status], className)}
         >
             {statusLabels[status]}
         </Badge>

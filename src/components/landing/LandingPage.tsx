@@ -10,7 +10,7 @@ type LandingPageProps = {
 
 export function LandingPage({ isAuthenticated }: LandingPageProps) {
     return (
-        <div className="min-h-screen bg-neutral-950 font-[family-name:var(--font-poppins)] text-white">
+        <div className="min-h-screen bg-white font-[family-name:var(--font-poppins)] text-slate-900">
             <LandingHeader isAuthenticated={isAuthenticated} />
             <main>
                 <LandingHero isAuthenticated={isAuthenticated} />

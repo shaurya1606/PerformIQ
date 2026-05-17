@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
 type LandingHeaderProps = {
@@ -7,46 +8,54 @@ type LandingHeaderProps = {
 
 export function LandingHeader({ isAuthenticated }: LandingHeaderProps) {
     return (
-        <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-neutral-950/80 backdrop-blur-md">
-            <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
+            <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-600 text-sm font-bold text-neutral-950">
-                        A
-                    </span>
-                    <span className="text-lg font-semibold tracking-tight text-white">
-                        AtomQuest
+                    <Image
+                        src="/logo.jpg"
+                        alt="PerformIQ"
+                        width={28}
+                        height={28}
+                        className="rounded-md object-contain"
+                        priority
+                    />
+                    <span className="text-sm font-semibold tracking-tight text-slate-900">
+                        PerformIQ
                     </span>
                 </Link>
 
-                <nav className="hidden items-center gap-8 text-sm text-neutral-400 md:flex">
-                    <a href="#features" className="transition hover:text-white">
+                {/* Nav */}
+                <nav className="hidden items-center gap-6 text-sm text-slate-500 md:flex">
+                    <a href="#features" className="transition hover:text-slate-900">
                         Features
                     </a>
-                    <a href="#how-it-works" className="transition hover:text-white">
+                    <a href="#how-it-works" className="transition hover:text-slate-900">
                         How it works
                     </a>
                 </nav>
 
-                <div className="flex items-center gap-2 sm:gap-3">
+                {/* CTA */}
+                <div className="flex items-center gap-2">
                     {isAuthenticated ? (
                         <Button
                             asChild
-                            className="bg-gradient-to-r from-amber-500 to-orange-600 text-neutral-950 hover:from-amber-400 hover:to-orange-500"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm h-9 px-4"
                         >
-                            <Link href="/dashboard">Enter portal</Link>
+                            <Link href="/dashboard">Go to Dashboard</Link>
                         </Button>
                     ) : (
                         <>
                             <Button
                                 asChild
                                 variant="ghost"
-                                className="text-neutral-300 hover:bg-white/10 hover:text-white"
+                                className="text-slate-600 hover:text-slate-900 text-sm h-9"
                             >
                                 <Link href="/login">Log in</Link>
                             </Button>
                             <Button
                                 asChild
-                                className="bg-gradient-to-r from-amber-500 to-orange-600 text-neutral-950 hover:from-amber-400 hover:to-orange-500"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm h-9 px-4"
                             >
                                 <Link href="/signup">Get started</Link>
                             </Button>

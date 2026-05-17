@@ -2,10 +2,10 @@ import type { QuarterLockState } from '@/lib/atomquest/cycle-utils'
 import { cn } from '@/lib/utils'
 
 const styles: Record<QuarterLockState, string> = {
-    active: 'border-emerald-800 bg-emerald-950/50 text-emerald-200',
-    past: 'border-neutral-700 bg-neutral-900/80 text-neutral-400',
-    future: 'border-amber-900/80 bg-amber-950/40 text-amber-200',
-    closed: 'border-red-900/80 bg-red-950/40 text-red-200',
+    active: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    past:   'border-slate-200  bg-slate-50  text-slate-500',
+    future: 'border-amber-200  bg-amber-50  text-amber-700',
+    closed: 'border-red-200    bg-red-50    text-red-700',
 }
 
 export function QuarterLockBadge({
@@ -20,11 +20,14 @@ export function QuarterLockBadge({
     return (
         <span
             className={cn(
-                'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium',
+                'inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium',
                 styles[state],
                 className
             )}
         >
+            {state === 'active' && (
+                <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            )}
             {label}
         </span>
     )

@@ -157,11 +157,11 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
 
     return (
         <PageShell
-            title={employee?.name ?? employee?.email ?? 'Employee'}
-            description={employee?.email ?? ''}
+            title={employee?.name ?? employee?.email ?? 'Employee Review'}
+            description={employee?.email ?? 'Goal sheet review and manager approval workflow'}
             actions={
-                <Button asChild variant="outline" size="sm">
-                    <Link href="/team">← Back to team</Link>
+                <Button asChild variant="outline" size="sm" className="border-slate-200 text-slate-600 hover:bg-slate-50">
+                    <Link href="/team">← Back to Team</Link>
                 </Button>
             }
         >
@@ -169,14 +169,14 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
 
             {loading ? (
                 <Card>
-                    <div className="flex items-center gap-3 text-neutral-400 text-sm">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-white" />
+                    <div className="flex items-center gap-2 text-slate-500 text-sm">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
                         Loading…
                     </div>
                 </Card>
             ) : !sheet ? (
                 <Card>
-                    <p className="text-sm text-neutral-400">
+                    <p className="text-sm text-slate-500">
                         This employee has not started a goal sheet yet.
                     </p>
                 </Card>
@@ -184,7 +184,7 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
                 <div className="space-y-4">
                     <Card>
                         <div className="flex flex-wrap items-center gap-3 mb-4">
-                            <CardTitle className="mb-0">Goal review</CardTitle>
+                            <CardTitle className="mb-0">Goal Review</CardTitle>
                             <SheetStatusBadge status={sheet.status} />
                         </div>
                         {sheet.returnReason && sheet.status === 'RETURNED' ? (
@@ -206,29 +206,34 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
                                         )
                                     }
                                 />
-                                <div className="mt-6 pt-4 border-t border-neutral-800 space-y-4">
+                                <div className="mt-6 pt-5 border-t border-slate-100 space-y-4">
                                     <Button
-                                        variant="secondary"
+                                        variant="outline"
                                         onClick={() => postAction('save')}
                                         disabled={saving}
+                                        className="border-slate-200 text-slate-700 hover:bg-slate-50"
                                     >
-                                        Save review edits
+                                        Save Review Edits
                                     </Button>
                                     <div className="space-y-2">
-                                        <Label className="text-neutral-400">
-                                            Return feedback (optional)
+                                        <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                            Return Feedback (optional)
                                         </Label>
                                         <textarea
                                             value={returnReason}
                                             onChange={(e) => setReturnReason(e.target.value)}
                                             rows={2}
                                             placeholder="What should the employee revise?"
-                                            className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white"
+                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                         />
                                     </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        <Button onClick={() => postAction('approve')} disabled={saving}>
-                                            Approve & lock
+                                    <div className="flex flex-wrap gap-3">
+                                        <Button
+                                            onClick={() => postAction('approve')}
+                                            disabled={saving}
+                                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                        >
+                                            Approve & Lock
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -240,8 +245,9 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
                                                 })
                                             }
                                             disabled={saving}
+                                            className="border-amber-300 text-amber-700 hover:bg-amber-50"
                                         >
-                                            Return for revision
+                                            Return for Revision
                                         </Button>
                                     </div>
                                 </div>
@@ -251,17 +257,17 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
                                 {goals.map((g) => (
                                     <div
                                         key={g.id}
-                                        className="rounded-lg border border-neutral-800 p-4"
+                                        className="rounded-lg border border-slate-200 bg-slate-50/50 p-4"
                                     >
-                                        <p className="font-medium text-white">{g.title}</p>
-                                        <p className="text-xs text-neutral-500 mt-1">
-                                            Target: {g.targetValue || '—'} · {g.weightage}%
+                                        <p className="font-semibold text-slate-900">{g.title}</p>
+                                        <p className="text-xs text-slate-500 mt-1">
+                                            Target: {g.targetValue || '—'} · {g.weightage}% weight
                                         </p>
                                     </div>
                                 ))}
                                 {sheet.status === 'LOCKED' ? (
-                                    <p className="text-sm text-emerald-400/90">
-                                        Approved and locked.
+                                    <p className="text-sm text-emerald-700 font-medium mt-2">
+                                        ✓ Approved and locked.
                                     </p>
                                 ) : null}
                             </div>
@@ -269,7 +275,7 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
                     </Card>
 
                     <Card>
-                        <CardTitle>Manager check-in comment</CardTitle>
+                        <CardTitle>Manager Check-in Comment</CardTitle>
                         <div className="flex flex-wrap gap-2 mb-4">
                             {CHECK_IN_PERIODS.map((p) => (
                                 <button
@@ -277,10 +283,10 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
                                     type="button"
                                     onClick={() => setCheckInPeriod(p)}
                                     className={cn(
-                                        'px-3 py-1.5 rounded-md text-sm font-medium border',
+                                        'px-3 py-1.5 rounded-md text-sm font-medium border transition-colors',
                                         checkInPeriod === p
-                                            ? 'bg-white text-black border-white'
-                                            : 'border-neutral-700 text-neutral-400'
+                                            ? 'bg-indigo-600 text-white border-indigo-600'
+                                            : 'border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
                                     )}
                                 >
                                     {p}
@@ -291,15 +297,15 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
                             value={managerComment}
                             onChange={(e) => setManagerComment(e.target.value)}
                             rows={3}
-                            className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white"
-                            placeholder="Recognition, coaching, or next steps…"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder="Recognition, coaching notes, or next steps…"
                         />
                         <Button
-                            className="mt-4"
+                            className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white"
                             onClick={saveComment}
                             disabled={saving || !managerComment.trim()}
                         >
-                            {saving ? 'Saving…' : 'Save comment'}
+                            {saving ? 'Saving…' : 'Save Comment'}
                         </Button>
                     </Card>
                 </div>
@@ -307,4 +313,3 @@ export function TeamMemberWorkspace({ userId }: { userId: string }) {
         </PageShell>
     )
 }
-

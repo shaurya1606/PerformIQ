@@ -17,25 +17,21 @@ export function PageShell({
     className,
 }: PageShellProps) {
     return (
-        <div
-            className={cn(
-                'w-full max-w-6xl mx-auto px-4 pb-16 space-y-6',
-                className
-            )}
-        >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className={cn('w-full space-y-6', className)}>
+            {/* Page header */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between pb-4 border-b border-slate-200">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
+                    <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
                         {title}
                     </h1>
                     {description ? (
-                        <p className="mt-1 text-sm text-neutral-400 max-w-2xl">
+                        <p className="mt-1 text-sm text-slate-500 max-w-2xl leading-relaxed">
                             {description}
                         </p>
                     ) : null}
                 </div>
                 {actions ? (
-                    <div className="flex flex-wrap gap-2">{actions}</div>
+                    <div className="flex flex-wrap gap-2 shrink-0">{actions}</div>
                 ) : null}
             </div>
             {children}
@@ -53,7 +49,7 @@ export function Card({
     return (
         <section
             className={cn(
-                'rounded-xl border border-neutral-800 bg-neutral-950/80 p-4 sm:p-6 shadow-lg',
+                'rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm',
                 className
             )}
         >
@@ -70,7 +66,7 @@ export function CardTitle({
     className?: string
 }) {
     return (
-        <h2 className={cn('text-lg font-medium text-white mb-4', className)}>
+        <h2 className={cn('text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4', className)}>
             {children}
         </h2>
     )

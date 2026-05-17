@@ -101,7 +101,7 @@ export function AdminWorkspace({
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = 'atomquest-achievement-report.csv'
+            a.download = 'performiq-achievement-report.csv'
             a.click()
             URL.revokeObjectURL(url)
             setToast({ type: 'success', text: 'Export downloaded.' })
@@ -146,22 +146,28 @@ export function AdminWorkspace({
 
     return (
         <PageShell
-            title="AtomQuest admin"
-            description={`FY${performanceYear} — cycles, compliance, audit trail, and shared KPIs.`}
+            title="Admin Dashboard"
+            description={`FY${performanceYear} — performance cycles, compliance overview, audit trail, and shared KPIs.`}
             actions={
-                <Button onClick={downloadExport} disabled={exporting} variant="outline">
-                    {exporting ? 'Exporting…' : 'Export CSV'}
+                <Button
+                    onClick={downloadExport}
+                    disabled={exporting}
+                    variant="outline"
+                    className="border-slate-200 text-slate-700 hover:bg-slate-50 text-sm"
+                >
+                    {exporting ? 'Exporting…' : '↓ Export CSV'}
                 </Button>
             }
         >
             {toast ? <AlertBanner variant={toast.type}>{toast.text}</AlertBanner> : null}
 
-            <div className="flex flex-wrap gap-2 border-b border-neutral-800 pb-2">
+            {/* Enterprise tab bar — underline style */}
+            <div className="flex gap-0 border-b border-slate-200">
                 {(
                     [
                         ['overview', 'Overview'],
-                        ['audit', 'Audit trail'],
-                        ['shared', 'Shared goals'],
+                        ['audit', 'Audit Trail'],
+                        ['shared', 'Shared KPIs'],
                     ] as const
                 ).map(([id, label]) => (
                     <button
@@ -169,10 +175,10 @@ export function AdminWorkspace({
                         type="button"
                         onClick={() => setTab(id)}
                         className={cn(
-                            'px-4 py-2 text-sm font-medium rounded-md',
+                            'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
                             tab === id
-                                ? 'bg-white text-black'
-                                : 'text-neutral-400 hover:bg-neutral-800'
+                                ? 'border-indigo-600 text-indigo-700'
+                                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                         )}
                     >
                         {label}
@@ -182,19 +188,38 @@ export function AdminWorkspace({
 
             {tab === 'overview' && (
                 <>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <StatCard label="Employees" value={loading ? '—' : String(stats?.totalEmployees ?? 0)} />
-                        <StatCard label="Submitted" value={loading ? '—' : String(stats?.submitted ?? 0)} sub={`${submitPct}% of team`} />
-                        <StatCard label="Approved" value={loading ? '—' : String(stats?.approved ?? 0)} sub={`${completionPct}% locked`} />
-                        <StatCard label="Pending review" value={loading ? '—' : String(stats?.pendingReviews ?? stats?.pendingApproval ?? 0)} />
+                    {/* KPI stat cards */}
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                         <StatCard
-                            label={`${stats?.activeQuarter ?? 'Q'} check-in`}
+                            label="Total Employees"
+                            value={loading ? '—' : String(stats?.totalEmployees ?? 0)}
+                        />
+                        <StatCard
+                            label="Submitted"
+                            value={loading ? '—' : String(stats?.submitted ?? 0)}
+                            sub={`${submitPct}% of workforce`}
+                            accent="amber"
+                        />
+                        <StatCard
+                            label="Approved"
+                            value={loading ? '—' : String(stats?.approved ?? 0)}
+                            sub={`${completionPct}% locked`}
+                            accent="emerald"
+                        />
+                        <StatCard
+                            label="Pending Review"
+                            value={loading ? '—' : String(stats?.pendingReviews ?? stats?.pendingApproval ?? 0)}
+                            accent="red"
+                        />
+                        <StatCard
+                            label={`${stats?.activeQuarter ?? 'Q?'} Check-in`}
                             value={loading ? '—' : `${stats?.quarterCheckInPct ?? 0}%`}
                             {...(!loading && stats
                                 ? {
                                       sub: `${stats.quarterCheckInCompleted ?? 0} with entries`,
                                   }
                                 : {})}
+                            accent="indigo"
                         />
                     </div>
 
@@ -211,42 +236,51 @@ export function AdminWorkspace({
                         />
                     ) : loading ? (
                         <Card>
-                            <p className="text-sm text-neutral-400">Loading charts…</p>
+                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
+                                Loading charts…
+                            </div>
                         </Card>
                     ) : null}
 
+                    {/* Submission progress */}
                     <Card>
-                        <CardTitle>Submission progress</CardTitle>
-                        <ProgressBar label="Submitted" value={submitPct} />
-                        <ProgressBar label="Approved (locked)" value={completionPct} className="mt-3" />
+                        <CardTitle>Submission Progress</CardTitle>
+                        <div className="space-y-4">
+                            <ProgressBar label="Submitted" value={submitPct} color="amber" />
+                            <ProgressBar label="Approved (locked)" value={completionPct} color="emerald" />
+                        </div>
                     </Card>
 
+                    {/* Manager completion table */}
                     {stats?.managers && stats.managers.length > 0 ? (
                         <Card>
-                            <CardTitle>Manager completion</CardTitle>
+                            <CardTitle>Manager Completion</CardTitle>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead>
-                                        <tr className="border-b border-neutral-800 text-left text-neutral-500">
-                                            <th className="py-2 pr-4">Manager</th>
-                                            <th className="py-2 pr-4">Reports</th>
-                                            <th className="py-2 pr-4">Approved</th>
-                                            <th className="py-2">Pending</th>
+                                        <tr className="border-b border-slate-200 bg-slate-50 text-left">
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Manager</th>
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Reports</th>
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Approved</th>
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Pending</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="divide-y divide-slate-100">
                                         {stats.managers.map((m) => (
-                                            <tr key={m.id} className="border-b border-neutral-800/50">
-                                                <td className="py-2 pr-4 text-white">
+                                            <tr key={m.id} className="hover:bg-slate-50 transition-colors">
+                                                <td className="py-3 px-3 font-medium text-slate-900">
                                                     {m.name ?? m.email}
                                                 </td>
-                                                <td className="py-2 pr-4 text-neutral-400">
+                                                <td className="py-3 px-3 text-slate-600">
                                                     {m.directReports}
                                                 </td>
-                                                <td className="py-2 pr-4 text-emerald-400">
-                                                    {m.approved}
+                                                <td className="py-3 px-3">
+                                                    <span className="text-emerald-700 font-semibold">{m.approved}</span>
                                                 </td>
-                                                <td className="py-2 text-amber-400">{m.pending}</td>
+                                                <td className="py-3 px-3">
+                                                    <span className="text-amber-700 font-semibold">{m.pending}</span>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -255,33 +289,34 @@ export function AdminWorkspace({
                         </Card>
                     ) : null}
 
+                    {/* Employee completion table */}
                     {stats?.employees && stats.employees.length > 0 ? (
                         <Card>
-                            <CardTitle>Employee completion</CardTitle>
+                            <CardTitle>Employee Goal Status</CardTitle>
                             <div className="overflow-x-auto max-h-80 overflow-y-auto">
                                 <table className="w-full text-sm">
-                                    <thead className="sticky top-0 bg-neutral-950">
-                                        <tr className="border-b border-neutral-800 text-left text-neutral-500">
-                                            <th className="py-2 pr-4">Employee</th>
-                                            <th className="py-2 pr-4 hidden sm:table-cell">Department</th>
-                                            <th className="py-2">Sheet status</th>
+                                    <thead className="sticky top-0 bg-slate-50">
+                                        <tr className="border-b border-slate-200 text-left">
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Employee</th>
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Department</th>
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="divide-y divide-slate-100">
                                         {stats.employees.map((row) => (
                                             <tr
                                                 key={row.id}
-                                                className="border-b border-neutral-800/50"
+                                                className="hover:bg-slate-50 transition-colors"
                                             >
-                                                <td className="py-2 pr-4 text-white">
+                                                <td className="py-3 px-3 font-medium text-slate-900">
                                                     {row.name ?? row.email}
                                                 </td>
-                                                <td className="py-2 pr-4 hidden sm:table-cell text-neutral-400">
+                                                <td className="py-3 px-3 hidden sm:table-cell text-slate-500">
                                                     {row.department ?? '—'}
                                                 </td>
-                                                <td className="py-2">
+                                                <td className="py-3 px-3">
                                                     {row.status === 'NONE' ? (
-                                                        <span className="text-neutral-500">No sheet</span>
+                                                        <span className="text-xs text-slate-400 font-medium">No sheet</span>
                                                     ) : (
                                                         <SheetStatusBadge status={row.status} />
                                                     )}
@@ -294,30 +329,38 @@ export function AdminWorkspace({
                         </Card>
                     ) : null}
 
+                    {/* Performance cycles */}
                     <Card>
-                        <CardTitle>Performance cycles</CardTitle>
+                        <CardTitle>Performance Cycles</CardTitle>
                         {cycles.length === 0 ? (
-                            <p className="text-sm text-neutral-400">No cycles for FY{performanceYear}.</p>
+                            <p className="text-sm text-slate-500">No cycles configured for FY{performanceYear}.</p>
                         ) : (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead>
-                                        <tr className="border-b border-neutral-800 text-left text-neutral-500">
-                                            <th className="py-3 pr-4">Phase</th>
-                                            <th className="py-3 pr-4">Window</th>
-                                            <th className="py-3 pr-4">Status</th>
+                                        <tr className="border-b border-slate-200 bg-slate-50 text-left">
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Phase</th>
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Window</th>
+                                            <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="divide-y divide-slate-100">
                                         {cycles.map((cycle) => (
-                                            <tr key={cycle.id} className="border-b border-neutral-800/60">
-                                                <td className="py-3 pr-4 text-white">{cycle.name}</td>
-                                                <td className="py-3 pr-4 text-neutral-400 text-xs">
+                                            <tr key={cycle.id} className="hover:bg-slate-50 transition-colors">
+                                                <td className="py-3 px-3 font-medium text-slate-900">{cycle.name}</td>
+                                                <td className="py-3 px-3 text-slate-500 text-xs">
                                                     {formatCycleDate(cycle.opensAt)} –{' '}
                                                     {formatCycleDate(cycle.closesAt)}
                                                 </td>
-                                                <td className={isCycleWindowOpen(cycle) ? 'text-emerald-400' : 'text-neutral-500'}>
-                                                    {isCycleWindowOpen(cycle) ? 'Open' : 'Closed'}
+                                                <td className="py-3 px-3">
+                                                    {isCycleWindowOpen(cycle) ? (
+                                                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                                                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                                            Open
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs text-slate-400 font-medium">Closed</span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}
@@ -331,36 +374,39 @@ export function AdminWorkspace({
 
             {tab === 'audit' && (
                 <Card>
-                    <CardTitle>Audit trail</CardTitle>
+                    <CardTitle>Audit Trail</CardTitle>
                     {auditLoading ? (
-                        <p className="text-sm text-neutral-400">Loading audit entries…</p>
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
+                            Loading audit entries…
+                        </div>
                     ) : auditLogs.length === 0 ? (
-                        <p className="text-sm text-neutral-400">No audit entries yet.</p>
+                        <p className="text-sm text-slate-500">No audit entries recorded yet.</p>
                     ) : (
                         <div className="overflow-x-auto max-h-[480px] overflow-y-auto">
                             <table className="w-full text-sm">
-                                <thead className="sticky top-0 bg-neutral-950">
-                                    <tr className="border-b border-neutral-800 text-left text-neutral-500">
-                                        <th className="py-2 pr-3">When</th>
-                                        <th className="py-2 pr-3">Who</th>
-                                        <th className="py-2 pr-3">Action</th>
-                                        <th className="py-2">Changes</th>
+                                <thead className="sticky top-0 bg-slate-50">
+                                    <tr className="border-b border-slate-200 text-left">
+                                        <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">When</th>
+                                        <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Who</th>
+                                        <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Action</th>
+                                        <th className="py-2.5 px-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Changes</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-slate-100">
                                     {auditLogs.map((log) => (
-                                        <tr key={log.id} className="border-b border-neutral-800/50 align-top">
-                                            <td className="py-3 pr-3 text-neutral-400 whitespace-nowrap text-xs">
+                                        <tr key={log.id} className="align-top hover:bg-slate-50 transition-colors">
+                                            <td className="py-3 px-3 text-slate-500 whitespace-nowrap text-xs">
                                                 {new Date(log.createdAt).toLocaleString()}
                                             </td>
-                                            <td className="py-3 pr-3 text-white">
+                                            <td className="py-3 px-3 font-medium text-slate-900">
                                                 {log.changedByName ?? log.changedByEmail ?? '—'}
                                             </td>
-                                            <td className="py-3 pr-3">
-                                                <span className="text-amber-200 font-medium">{log.action}</span>
-                                                <span className="block text-xs text-neutral-500">{log.entityType}</span>
+                                            <td className="py-3 px-3">
+                                                <span className="text-indigo-700 font-semibold text-xs">{log.action}</span>
+                                                <span className="block text-xs text-slate-400 mt-0.5">{log.entityType}</span>
                                             </td>
-                                            <td className="py-3 text-xs text-neutral-400 font-mono max-w-md whitespace-pre-wrap">
+                                            <td className="py-3 px-3 text-xs text-slate-500 font-mono max-w-md whitespace-pre-wrap">
                                                 {formatAuditChanges(log.changes)}
                                             </td>
                                         </tr>
@@ -374,27 +420,27 @@ export function AdminWorkspace({
 
             {tab === 'shared' && (
                 <Card>
-                    <CardTitle>Assign shared KPI (demo)</CardTitle>
-                    <p className="text-sm text-neutral-400 mb-4">
+                    <CardTitle>Assign Shared KPI</CardTitle>
+                    <p className="text-sm text-slate-500 mb-5">
                         Assign one KPI to multiple employees. Recipients see a{' '}
-                        <strong className="text-blue-300">Shared KPI</strong> badge — title and target are read-only; they may adjust weightage only. The{' '}
-                        <strong className="text-blue-300">primary owner</strong> check-in syncs achievement to all copies.
+                        <strong className="text-indigo-700">Shared KPI</strong> badge — title and target are read-only; they may adjust weightage only. The{' '}
+                        <strong className="text-indigo-700">primary owner</strong> check-in syncs achievement to all copies.
                     </p>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2 sm:col-span-2">
-                            <Label>Title</Label>
+                            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Title</Label>
                             <Input
                                 value={sharedForm.title}
                                 onChange={(e) => setSharedForm((f) => ({ ...f, title: e.target.value }))}
-                                className="bg-neutral-900 border-neutral-700"
+                                className="border-slate-200 bg-white text-slate-900 focus-visible:ring-indigo-500"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Thrust area</Label>
+                            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Thrust Area</Label>
                             <select
                                 value={sharedForm.thrustAreaId}
                                 onChange={(e) => setSharedForm((f) => ({ ...f, thrustAreaId: e.target.value }))}
-                                className="flex h-9 w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 text-sm text-white"
+                                className="flex h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
                                 {thrustAreas.map((t) => (
                                     <option key={t.id} value={t.id}>{t.name}</option>
@@ -402,11 +448,11 @@ export function AdminWorkspace({
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <Label>UOM</Label>
+                            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">UOM</Label>
                             <select
                                 value={sharedForm.uomType}
                                 onChange={(e) => setSharedForm((f) => ({ ...f, uomType: e.target.value as UomType }))}
-                                className="flex h-9 w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 text-sm text-white"
+                                className="flex h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
                                 {UOM_OPTIONS.map((o) => (
                                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -414,28 +460,28 @@ export function AdminWorkspace({
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <Label>Target</Label>
+                            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Target</Label>
                             <Input
                                 value={sharedForm.targetValue}
                                 onChange={(e) => setSharedForm((f) => ({ ...f, targetValue: e.target.value }))}
-                                className="bg-neutral-900 border-neutral-700"
+                                className="border-slate-200 bg-white text-slate-900 focus-visible:ring-indigo-500"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Weightage %</Label>
+                            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Weightage %</Label>
                             <Input
                                 type="number"
                                 value={sharedForm.weightage}
                                 onChange={(e) => setSharedForm((f) => ({ ...f, weightage: Number(e.target.value) }))}
-                                className="bg-neutral-900 border-neutral-700"
+                                className="border-slate-200 bg-white text-slate-900 focus-visible:ring-indigo-500"
                             />
                         </div>
                         <div className="space-y-2 sm:col-span-2">
-                            <Label>Primary owner (syncs achievement)</Label>
+                            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Primary Owner (syncs achievement)</Label>
                             <select
                                 value={sharedForm.primaryOwnerUserId}
                                 onChange={(e) => setSharedForm((f) => ({ ...f, primaryOwnerUserId: e.target.value }))}
-                                className="flex h-9 w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 text-sm text-white"
+                                className="flex h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
                                 {employees.map((e) => (
                                     <option key={e.id} value={e.id}>{e.name ?? e.email}</option>
@@ -443,7 +489,7 @@ export function AdminWorkspace({
                             </select>
                         </div>
                         <div className="space-y-2 sm:col-span-2">
-                            <Label>Assign to employees</Label>
+                            <Label className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Assign to Employees</Label>
                             <div className="flex flex-wrap gap-2">
                                 {employees.map((e) => {
                                     const selected = sharedForm.employeeIds.includes(e.id)
@@ -460,10 +506,10 @@ export function AdminWorkspace({
                                                 }))
                                             }
                                             className={cn(
-                                                'px-3 py-1 rounded-full text-xs border',
+                                                'px-3 py-1.5 rounded-md text-xs font-medium border transition-colors',
                                                 selected
-                                                    ? 'bg-white text-black border-white'
-                                                    : 'border-neutral-700 text-neutral-400'
+                                                    ? 'bg-indigo-600 text-white border-indigo-600'
+                                                    : 'border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50'
                                             )}
                                         >
                                             {e.name ?? e.email}
@@ -473,39 +519,79 @@ export function AdminWorkspace({
                             </div>
                         </div>
                     </div>
-                    <Button className="mt-4" onClick={assignShared} disabled={assigning}>
-                        {assigning ? 'Assigning…' : 'Assign shared KPI'}
-                    </Button>
+                    <div className="mt-6 pt-4 border-t border-slate-100">
+                        <Button
+                            onClick={assignShared}
+                            disabled={assigning}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        >
+                            {assigning ? 'Assigning…' : 'Assign Shared KPI'}
+                        </Button>
+                    </div>
                 </Card>
             )}
         </PageShell>
     )
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+type AccentColor = 'indigo' | 'emerald' | 'amber' | 'red'
+
+function StatCard({
+    label,
+    value,
+    sub,
+    accent,
+}: {
+    label: string
+    value: string
+    sub?: string
+    accent?: AccentColor
+}) {
+    const accentMap: Record<AccentColor, string> = {
+        indigo: 'text-indigo-700',
+        emerald: 'text-emerald-700',
+        amber: 'text-amber-700',
+        red: 'text-red-600',
+    }
+    const accentClass = accent ? accentMap[accent] : 'text-slate-900'
+
     return (
-        <div className="rounded-xl border border-neutral-800 bg-neutral-950/80 p-4">
-            <p className="text-xs uppercase tracking-wide text-neutral-500">{label}</p>
-            <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
-            {sub ? <p className="text-xs text-neutral-500 mt-1">{sub}</p> : null}
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</p>
+            <p className={`mt-2 text-2xl font-bold ${accentClass}`}>{value}</p>
+            {sub ? <p className="text-xs text-slate-400 mt-1">{sub}</p> : null}
         </div>
     )
 }
 
-function ProgressBar({ label, value, className }: { label: string; value: number; className?: string }) {
+function ProgressBar({
+    label,
+    value,
+    color = 'indigo',
+    className,
+}: {
+    label: string
+    value: number
+    color?: 'indigo' | 'emerald' | 'amber'
+    className?: string
+}) {
+    const fillMap = {
+        indigo: 'bg-indigo-500',
+        emerald: 'bg-emerald-500',
+        amber: 'bg-amber-500',
+    }
     return (
         <div className={className}>
-            <div className="flex justify-between text-sm mb-1">
-                <span className="text-neutral-400">{label}</span>
-                <span className="text-white font-medium">{value}%</span>
+            <div className="flex justify-between text-sm mb-1.5">
+                <span className="text-slate-600 font-medium">{label}</span>
+                <span className="text-slate-900 font-semibold">{value}%</span>
             </div>
-            <div className="h-2 rounded-full bg-neutral-800 overflow-hidden">
+            <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                 <div
-                    className="h-full bg-emerald-500 transition-all duration-500"
+                    className={`h-full ${fillMap[color]} rounded-full transition-all duration-500`}
                     style={{ width: `${Math.min(100, value)}%` }}
                 />
             </div>
         </div>
     )
 }
-

@@ -15,13 +15,13 @@ export function EmptyState({
     return (
         <div
             className={cn(
-                'rounded-lg border border-dashed border-neutral-700 bg-neutral-950/40 px-6 py-10 text-center',
+                'rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center',
                 className
             )}
         >
-            <p className="text-sm font-medium text-white">{title}</p>
+            <p className="text-sm font-semibold text-slate-700">{title}</p>
             {description ? (
-                <p className="mt-2 text-sm text-neutral-400 max-w-md mx-auto">
+                <p className="mt-2 text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
                     {description}
                 </p>
             ) : null}

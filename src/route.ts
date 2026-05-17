@@ -9,7 +9,7 @@
 
 export const publicRoutes = ['/', '/verify-email',]
 
-export const publicRoutePrefixes: string[] = []
+export const publicRoutePrefixes: string[] = ['/terms', '/privacy']
 
 export const authRoutes = [
     '/login',

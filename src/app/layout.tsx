@@ -9,9 +9,9 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-    title: 'AtomQuest Goal Portal',
+    title: 'PerformIQ — Performance Lifecycle Management',
     description:
-        'Set goals, track quarterly achievement, and align your team with AtomQuest — the Ignitia 2026 performance portal.',
+        'PerformIQ is an enterprise performance lifecycle management platform — structured goal-setting, quarterly check-ins, manager review workflows, and KPI governance at scale.',
 }
 
 export default function RootLayout({
@@ -19,14 +19,12 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode
 }>) {
-
-
     return (
-        <html lang="en" className="dark">
+        <html lang="en">
             <body
                 className={`${poppins.variable} font-[family-name:var(--font-poppins)] antialiased`}
             >
-               {children}
+                {children}
             </body>
         </html>
     )

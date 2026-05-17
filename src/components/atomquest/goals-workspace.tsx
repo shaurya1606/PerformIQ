@@ -288,29 +288,33 @@ export function GoalsWorkspace() {
             setValidationErrors(parsed.valid ? [] : parsed.errors)
         }
     }, [goals, canEdit, tab])
+
     const statusLabel =
         data?.sheet.status === 'RETURNED'
-            ? 'Returned — revise and resubmit'
+            ? 'Returned for revision — please address manager feedback and resubmit.'
             : data?.sheet.status === 'LOCKED'
-              ? 'Approved & locked'
+              ? 'Goal sheet approved & locked by your manager.'
               : undefined
 
     return (
         <PageShell
-            title="My goals"
-            description="Annual goal sheet and quarterly progress for the current cycle."
+            title="My Goals"
+            description="Annual goal sheet and quarterly progress tracking for the current performance cycle."
             actions={data ? <SheetStatusBadge status={data.sheet.status} /> : undefined}
         >
             {statusLabel ? (
-                <AlertBanner variant="info">{statusLabel}</AlertBanner>
+                <AlertBanner variant={data?.sheet.status === 'RETURNED' ? 'info' : 'success'}>
+                    {statusLabel}
+                </AlertBanner>
             ) : null}
             {toast ? <AlertBanner variant={toast.type}>{toast.text}</AlertBanner> : null}
 
-            <div className="flex gap-2 border-b border-neutral-800 pb-2">
+            {/* Enterprise underline tabs */}
+            <div className="flex gap-0 border-b border-slate-200">
                 {(
                     [
-                        ['sheet', 'Goal sheet'],
-                        ['check-in', 'Quarterly check-in'],
+                        ['sheet', 'Goal Sheet'],
+                        ['check-in', 'Quarterly Check-in'],
                     ] as const
                 ).map(([id, label]) => (
                     <button
@@ -318,10 +322,10 @@ export function GoalsWorkspace() {
                         type="button"
                         onClick={() => setTab(id)}
                         className={cn(
-                            'px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                            'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
                             tab === id
-                                ? 'bg-white text-black'
-                                : 'text-neutral-400 hover:text-white hover:bg-neutral-800'
+                                ? 'border-indigo-600 text-indigo-700'
+                                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                         )}
                     >
                         {label}
@@ -331,8 +335,8 @@ export function GoalsWorkspace() {
 
             {loading ? (
                 <Card>
-                    <div className="flex items-center gap-3 text-neutral-400 text-sm">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-600 border-t-white" />
+                    <div className="flex items-center gap-2 text-slate-500 text-sm">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
                         Loading goal sheet…
                     </div>
                 </Card>
@@ -340,7 +344,7 @@ export function GoalsWorkspace() {
                 <Card>
                     {data?.sheet.returnReason && data.sheet.status === 'RETURNED' ? (
                         <AlertBanner variant="info" className="mb-4">
-                            <span className="font-medium">Manager feedback:</span>{' '}
+                            <span className="font-semibold">Manager feedback:</span>{' '}
                             {data.sheet.returnReason}
                         </AlertBanner>
                     ) : null}
@@ -357,24 +361,26 @@ export function GoalsWorkspace() {
                         onRemove={(i) => setGoals((p) => p.filter((_, idx) => idx !== i))}
                     />
                     {canEdit ? (
-                        <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-neutral-800">
+                        <div className="flex flex-wrap gap-3 mt-6 pt-5 border-t border-slate-100">
                             <Button
-                                variant="secondary"
+                                variant="outline"
                                 onClick={saveDraft}
                                 disabled={saving || validationErrors.length > 0}
+                                className="border-slate-200 text-slate-700 hover:bg-slate-50"
                             >
-                                {saving ? 'Saving…' : 'Save draft'}
+                                {saving ? 'Saving…' : 'Save Draft'}
                             </Button>
                             <Button
                                 onClick={submitSheet}
                                 disabled={saving || validationErrors.length > 0}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white"
                             >
-                                Submit for approval
+                                Submit for Approval
                             </Button>
                         </div>
                     ) : (
-                        <p className="text-sm text-neutral-500 mt-4">
-                            This sheet is read-only in its current status.
+                        <p className="text-sm text-slate-400 mt-4">
+                            This goal sheet is read-only in its current status.
                         </p>
                     )}
                 </Card>
@@ -439,10 +445,11 @@ function CheckInPanel({
     const quarterInfo = quartersMeta?.quarters.find((q) => q.phase === period)
     const lockState = (quarterInfo?.lockState ?? 'closed') as QuarterLockState
     const editable = quarterInfo?.editable ?? false
+
     if (!canCheckIn) {
         return (
             <Card>
-                <p className="text-sm text-neutral-400">
+                <p className="text-sm text-slate-500">
                     Quarterly check-ins unlock after your manager approves and locks your goal sheet.
                 </p>
             </Card>
@@ -452,7 +459,7 @@ function CheckInPanel({
     return (
         <Card>
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <CardTitle className="mb-0">Quarterly check-in</CardTitle>
+                <CardTitle className="mb-0">Quarterly Check-in</CardTitle>
                 {quarterInfo ? (
                     <QuarterLockBadge
                         state={lockState}
@@ -461,13 +468,15 @@ function CheckInPanel({
                 ) : null}
             </div>
             {quartersMeta ? (
-                <p className="text-xs text-neutral-500 mb-4">
+                <p className="text-xs text-slate-500 mb-4">
                     Active quarter:{' '}
-                    <strong className="text-neutral-300">{quartersMeta.activeQuarter}</strong>
-                    — only this quarter accepts edits.
+                    <strong className="text-slate-700">{quartersMeta.activeQuarter}</strong>
+                    {' '}— only this quarter accepts edits.
                 </p>
             ) : null}
-            <div className="flex flex-wrap gap-2 mb-6">
+
+            {/* Quarter selector tabs */}
+            <div className="flex flex-wrap gap-2 mb-5">
                 {CHECK_IN_PERIODS.map((p) => {
                     const q = quartersMeta?.quarters.find((x) => x.phase === p)
                     return (
@@ -476,19 +485,22 @@ function CheckInPanel({
                             type="button"
                             onClick={() => onPeriodChange(p)}
                             className={cn(
-                                'px-3 py-1.5 rounded-md text-sm font-medium border',
+                                'px-3 py-1.5 rounded-md text-sm font-medium border transition-colors',
                                 period === p
-                                    ? 'bg-white text-black border-white'
-                                    : 'border-neutral-700 text-neutral-400',
-                                q?.isActive && period !== p && 'border-emerald-800/60'
+                                    ? 'bg-indigo-600 text-white border-indigo-600'
+                                    : 'border-slate-200 text-slate-600 hover:border-indigo-300 hover:bg-indigo-50',
+                                q?.isActive && period !== p && 'border-emerald-300'
                             )}
                         >
                             {p}
-                            {q?.isActive ? ' •' : ''}
+                            {q?.isActive ? (
+                                <span className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 align-middle" />
+                            ) : ''}
                         </button>
                     )
                 })}
             </div>
+
             {!editable ? (
                 <AlertBanner variant="info" className="mb-4">
                     This quarter is view-only. Switch to{' '}
@@ -497,18 +509,26 @@ function CheckInPanel({
                 </AlertBanner>
             ) : null}
             {loading ? (
-                <p className="text-sm text-neutral-400 mb-4">Loading {period} entries…</p>
+                <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
+                    Loading {period} entries…
+                </div>
             ) : null}
+
             <div className="space-y-4">
                 {goals.map((g) => (
-                    <div key={g.id} className="rounded-lg border border-neutral-800 p-4 space-y-3">
+                    <div key={g.id} className="rounded-lg border border-slate-200 bg-slate-50/50 p-4 space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium text-white">{g.title}</p>
+                            <p className="font-semibold text-slate-900">{g.title}</p>
                             {g.isSharedRecipient ? (
-                                <span className="text-xs text-blue-400">Shared KPI</span>
+                                <span className="text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full px-2 py-0.5">
+                                    Shared KPI
+                                </span>
                             ) : null}
                             {g.isPrimaryOwner && g.sharedGoalId ? (
-                                <span className="text-xs text-blue-400">Primary owner — syncs to team</span>
+                                <span className="text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-full px-2 py-0.5">
+                                    Primary owner — syncs to team
+                                </span>
                             ) : null}
                         </div>
                         <CheckInFields
@@ -519,30 +539,33 @@ function CheckInPanel({
                             onChange={(patch) => onRowChange(g.id, patch)}
                         />
                         {g.isPrimaryOwner && g.sharedGoalId ? (
-                            <p className="text-xs text-neutral-500">
+                            <p className="text-xs text-slate-400">
                                 Saving updates progress for all recipients of this shared KPI.
                             </p>
                         ) : null}
                     </div>
                 ))}
             </div>
-            <Button
-                className="mt-6"
-                onClick={onSubmit}
-                disabled={saving || goals.length === 0 || !editable}
-                title={
-                    !editable
-                        ? `Only ${quartersMeta?.activeQuarter ?? 'the active quarter'} can be saved`
-                        : undefined
-                }
-            >
-                {saving ? 'Saving…' : `Save ${period} check-in`}
-            </Button>
-            {!editable && goals.length > 0 ? (
-                <p className="mt-2 text-xs text-neutral-500">
-                    Save is disabled because this quarter is not the active check-in window.
-                </p>
-            ) : null}
+
+            <div className="mt-6 flex items-center gap-3">
+                <Button
+                    onClick={onSubmit}
+                    disabled={saving || goals.length === 0 || !editable}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    title={
+                        !editable
+                            ? `Only ${quartersMeta?.activeQuarter ?? 'the active quarter'} can be saved`
+                            : undefined
+                    }
+                >
+                    {saving ? 'Saving…' : `Save ${period} Check-in`}
+                </Button>
+                {!editable && goals.length > 0 ? (
+                    <p className="text-xs text-slate-400">
+                        Only the active quarter window accepts edits.
+                    </p>
+                ) : null}
+            </div>
         </Card>
     )
 }
